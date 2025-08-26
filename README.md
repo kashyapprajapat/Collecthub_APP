@@ -1,16 +1,9 @@
-# collecthub
+# CollectHub 🎒
 
-A new Flutter project.
+## Your personal collections, all in one place — in one app.
 
-## Getting Started
+![Development Status](https://img.shields.io/badge/Status-Under%20Development-orange?style=for-the-badge)
 
-This project is a starting point for a Flutter application.
+![Platform](https://img.shields.io/badge/Platform-Mobile-blue?style=for-the-badge)
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+<img src="https://res.cloudinary.com/dpf5bkafv/image/upload/v1756207961/Logo_aktvuj.png" alt="CollectHub Logo" width="200"/>
