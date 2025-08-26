@@ -1,5 +1,5 @@
 name: collecthub
-description: "A new Flutter project."
+description: "Your personal collections, all in one place — in one app."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -46,6 +46,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.13.1 # Keep this here
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -88,3 +89,13 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# Configuration for flutter_launcher_icons package
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/Logo.png" # Updated path to your specific logo file
+  min_sdk_android: 21 # Common minimum Android SDK version for Flutter apps
+  # You can uncomment and use these if you want a more advanced adaptive icon for Android
+  # adaptive_icon_background: "#FFFFFF" # Example: White background for adaptive icons
+  # adaptive_icon_foreground: "assets/images/Logo_foreground.png" # If you have a separate foreground image
