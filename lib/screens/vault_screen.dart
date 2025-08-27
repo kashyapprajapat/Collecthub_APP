@@ -1,4 +1,11 @@
 import 'package:flutter/material.dart';
+// Import all the new collection screens
+import 'book_collection_screen.dart';
+import 'recipe_collection_screen.dart';
+import 'movie_collection_screen.dart';
+import 'quote_collection_screen.dart';
+import 'pet_collection_screen.dart';
+import 'travel_collection_screen.dart';
 
 class VaultScreen extends StatefulWidget {
   final String userName;
@@ -38,13 +45,47 @@ class _VaultScreenState extends State<VaultScreen>
       _controller.reverse();
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$title - Coming Soon!'),
-        duration: const Duration(seconds: 2),
-        backgroundColor: Colors.black87,
-      ),
-    );
+    // Determine which screen to navigate to based on the card title
+    Widget? destinationScreen; // Use a nullable type
+
+    switch (title) {
+      case "Books":
+        destinationScreen = BookCollectionScreen(userName: widget.userName);
+        break;
+      case "Recipes":
+        destinationScreen = RecipeCollectionScreen(userName: widget.userName);
+        break;
+      case "Movies":
+        destinationScreen = MovieCollectionScreen(userName: widget.userName);
+        break;
+      case "Quotes":
+        destinationScreen = QuoteCollectionScreen(userName: widget.userName);
+        break;
+      case "Pets":
+        destinationScreen = PetCollectionScreen(userName: widget.userName);
+        break;
+      case "Travel":
+        destinationScreen = TravelCollectionScreen(userName: widget.userName);
+        break;
+      default:
+        // If the title doesn't match any known screens, show a snackbar
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('$title - Coming Soon!'),
+            duration: const Duration(seconds: 2),
+            backgroundColor: Colors.black87,
+          ),
+        );
+        return; // Exit the function if no valid destination is found
+    }
+
+    // Navigate to the chosen destination screen
+    if (destinationScreen != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => destinationScreen!),
+      );
+    }
   }
 
   @override
