@@ -3,6 +3,7 @@ import '../models/user_model.dart';
 import '../utils/constants.dart';
 
 class StorageService {
+  // Save user data to local storage
   static Future<void> saveUser(User user) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(AppConstants.userIdKey, user.id);
@@ -10,6 +11,7 @@ class StorageService {
     await prefs.setString(AppConstants.userEmailKey, user.email);
   }
 
+  // Get user data from local storage
   static Future<User?> getUser() async {
     final prefs = await SharedPreferences.getInstance();
     final id = prefs.getString(AppConstants.userIdKey);
@@ -22,6 +24,7 @@ class StorageService {
     return null;
   }
 
+  // Clear user data from local storage (logout)
   static Future<void> clearUser() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(AppConstants.userIdKey);
@@ -29,8 +32,25 @@ class StorageService {
     await prefs.remove(AppConstants.userEmailKey);
   }
 
+  // Check if user is logged in
   static Future<bool> isUserLoggedIn() async {
     final user = await getUser();
     return user != null;
+  }
+
+  // Get individual user data
+  static Future<String?> getUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(AppConstants.userIdKey);
+  }
+
+  static Future<String?> getUserName() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(AppConstants.userNameKey);
+  }
+
+  static Future<String?> getUserEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(AppConstants.userEmailKey);
   }
 }
