@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../services/storage_service.dart';
-import '../utils/constants.dart'; // Ensure this path is correct for your project
+// Ensure this path is correct for your project
 
 class Recipe {
   final String id;
