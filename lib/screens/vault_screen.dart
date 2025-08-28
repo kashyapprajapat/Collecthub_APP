@@ -45,8 +45,11 @@ class _VaultScreenState extends State<VaultScreen>
       _controller.reverse();
     });
 
+    // Check if widget is still mounted before proceeding
+    if (!mounted) return;
+
     // Determine which screen to navigate to based on the card title
-    Widget? destinationScreen; // Use a nullable type
+    Widget destinationScreen;
 
     switch (title) {
       case "Books":
@@ -80,12 +83,10 @@ class _VaultScreenState extends State<VaultScreen>
     }
 
     // Navigate to the chosen destination screen
-    if (destinationScreen != null) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => destinationScreen!),
-      );
-    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => destinationScreen),
+    );
   }
 
   @override
