@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
-// Import all the new collection screens
 import 'book_collection_screen.dart';
 import 'recipe_collection_screen.dart';
 import 'movie_collection_screen.dart';
 import 'quote_collection_screen.dart';
 import 'pet_collection_screen.dart';
 import 'travel_collection_screen.dart';
+import 'mobile_apps_collection_screen.dart';
+import 'music_collection_screen.dart';
+import 'vehicle_collection_screen.dart';
+import 'youtube_channels_collection_screen.dart';
 
 class VaultScreen extends StatefulWidget {
   final String userName;
@@ -27,6 +30,10 @@ class _VaultScreenState extends State<VaultScreen>
     {"title": "Quotes", "icon": Icons.format_quote_rounded, "color": Colors.purple},
     {"title": "Pets", "icon": Icons.pets_rounded, "color": Colors.green},
     {"title": "Travel", "icon": Icons.flight_takeoff_rounded, "color": Colors.teal},
+    {"title": "Mobile Apps", "icon": Icons.smartphone_rounded, "color": Colors.indigo},
+    {"title": "Music", "icon": Icons.music_note_rounded, "color": Colors.pink},
+    {"title": "Vehicles", "icon": Icons.directions_car_rounded, "color": Colors.amber},
+    {"title": "YouTube", "icon": Icons.play_circle_filled_rounded, "color": Colors.deepOrange},
   ];
 
   @override
@@ -69,6 +76,18 @@ class _VaultScreenState extends State<VaultScreen>
         break;
       case "Travel":
         destinationScreen = TravelCollectionScreen(userName: widget.userName);
+        break;
+      case "Mobile Apps":
+        destinationScreen = MobileAppsCollectionScreen(userName: widget.userName);
+        break;
+      case "Music":
+        destinationScreen = MusicCollectionScreen(userName: widget.userName);
+        break;
+      case "Vehicles":
+        destinationScreen = VehicleCollectionScreen(userName: widget.userName);
+        break;
+      case "YouTube":
+        destinationScreen = YouTubeChannelsCollectionScreen(userName: widget.userName);
         break;
       default:
         // If the title doesn't match any known screens, show a snackbar
