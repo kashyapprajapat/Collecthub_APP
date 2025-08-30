@@ -72,6 +72,34 @@ class _HomeScreenState extends State<HomeScreen>
       'gradient': [Colors.teal.shade400, Colors.teal.shade600],
       'number': '6'
     },
+    {
+      'title': 'Mobile Apps',
+      'color': Colors.indigo,
+      'description': 'Keep track of your go-to apps and daily essentials',
+      'gradient': [Colors.indigo.shade400, Colors.indigo.shade600],
+      'number': '7'
+    },
+    {
+      'title': 'Music Collection',
+      'color': Colors.pink,
+      'description': 'Collect your favorite tracks, artists, and playlists that move you',
+      'gradient': [Colors.pink.shade400, Colors.pink.shade600],
+      'number': '8'
+    },
+    {
+      'title': 'Vehicle Collection',
+      'color': Colors.amber,
+      'description': 'A hub for the rides you love or dream to own',
+      'gradient': [Colors.amber.shade500, Colors.amber.shade700],
+      'number': '9'
+    },
+    {
+      'title': 'YouTube Channels',
+      'color': Colors.deepOrange,
+      'description': 'Save and organize channels that inspire, teach, or entertain',
+      'gradient': [Colors.deepOrange.shade400, Colors.deepOrange.shade600],
+      'number': '10'
+    },
   ];
 
   @override
@@ -83,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen>
     );
     
     _cardController = AnimationController(
-      duration: Duration(milliseconds: 2000),
+      duration: Duration(milliseconds: 2500),
       vsync: this,
     );
     
@@ -115,8 +143,8 @@ class _HomeScreenState extends State<HomeScreen>
         CurvedAnimation(
           parent: _cardController,
           curve: Interval(
-            index * 0.15,
-            0.7 + index * 0.15,
+            index * 0.1,
+            0.6 + index * 0.1,
             curve: Curves.elasticOut,
           ),
         ),
@@ -132,8 +160,8 @@ class _HomeScreenState extends State<HomeScreen>
         CurvedAnimation(
           parent: _cardController,
           curve: Interval(
-            index * 0.15,
-            0.7 + index * 0.15,
+            index * 0.1,
+            0.6 + index * 0.1,
             curve: Curves.elasticOut,
           ),
         ),
@@ -367,119 +395,30 @@ class _HomeScreenState extends State<HomeScreen>
                     
                     // Collections - Staggered Layout
                     Column(
-                      children: [
-                        // Row 1 - Card 1 (left)
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: AnimatedBuilder(
-                            animation: _cardController,
-                            builder: (context, child) {
-                              return SlideTransition(
-                                position: _cardAnimations[0],
-                                child: ScaleTransition(
-                                  scale: _cardScaleAnimations[0],
-                                  child: _buildStaggeredCard(collections[0], true),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
+                      children: List.generate(collections.length, (index) {
+                        bool isLeft = index % 2 == 0; // Even indices go left, odd go right
                         
-                        SizedBox(height: 15),
-                        
-                        // Row 2 - Card 2 (right)
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: AnimatedBuilder(
-                            animation: _cardController,
-                            builder: (context, child) {
-                              return SlideTransition(
-                                position: _cardAnimations[1],
-                                child: ScaleTransition(
-                                  scale: _cardScaleAnimations[1],
-                                  child: _buildStaggeredCard(collections[1], false),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        
-                        SizedBox(height: 15),
-                        
-                        // Row 3 - Card 3 (left)
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: AnimatedBuilder(
-                            animation: _cardController,
-                            builder: (context, child) {
-                              return SlideTransition(
-                                position: _cardAnimations[2],
-                                child: ScaleTransition(
-                                  scale: _cardScaleAnimations[2],
-                                  child: _buildStaggeredCard(collections[2], true),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        
-                        SizedBox(height: 15),
-                        
-                        // Row 4 - Card 4 (right)
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: AnimatedBuilder(
-                            animation: _cardController,
-                            builder: (context, child) {
-                              return SlideTransition(
-                                position: _cardAnimations[3],
-                                child: ScaleTransition(
-                                  scale: _cardScaleAnimations[3],
-                                  child: _buildStaggeredCard(collections[3], false),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        
-                        SizedBox(height: 15),
-                        
-                        // Row 5 - Card 5 (left)
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: AnimatedBuilder(
-                            animation: _cardController,
-                            builder: (context, child) {
-                              return SlideTransition(
-                                position: _cardAnimations[4],
-                                child: ScaleTransition(
-                                  scale: _cardScaleAnimations[4],
-                                  child: _buildStaggeredCard(collections[4], true),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        
-                        SizedBox(height: 15),
-                        
-                        // Row 6 - Card 6 (right)
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: AnimatedBuilder(
-                            animation: _cardController,
-                            builder: (context, child) {
-                              return SlideTransition(
-                                position: _cardAnimations[5],
-                                child: ScaleTransition(
-                                  scale: _cardScaleAnimations[5],
-                                  child: _buildStaggeredCard(collections[5], false),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
+                        return Column(
+                          children: [
+                            Align(
+                              alignment: isLeft ? Alignment.centerLeft : Alignment.centerRight,
+                              child: AnimatedBuilder(
+                                animation: _cardController,
+                                builder: (context, child) {
+                                  return SlideTransition(
+                                    position: _cardAnimations[index],
+                                    child: ScaleTransition(
+                                      scale: _cardScaleAnimations[index],
+                                      child: _buildStaggeredCard(collections[index], isLeft),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            if (index < collections.length - 1) SizedBox(height: 15),
+                          ],
+                        );
+                      }),
                     ),
                     
                     SizedBox(height: 40),
