@@ -56,7 +56,7 @@ class Travel {
     final String day = date.day.toString().padLeft(2, '0');
 
     // Combine with the fixed time and timezone offset
-    return '$year-$month-$day' + 'T10:30:00.000+00:00';
+    return '$year-$month-$day' 'T10:30:00.000+00:00';
   }
 
   // Used for adding new travels (POST request)
