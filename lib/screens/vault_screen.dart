@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'book_collection_screen.dart';
 import 'recipe_collection_screen.dart';
 import 'movie_collection_screen.dart';
@@ -22,136 +23,364 @@ class VaultScreen extends StatefulWidget {
 class _VaultScreenState extends State<VaultScreen>
     with TickerProviderStateMixin {
   late AnimationController _controller;
+  late AnimationController _staggerController;
+  int? _tappedIndex;
 
   final List<Map<String, dynamic>> vaultItems = [
-    {"title": "Books", "icon": Icons.menu_book_rounded, "color": Colors.blue},
-    {"title": "Recipes", "icon": Icons.restaurant_menu, "color": Colors.orange},
-    {"title": "Movies", "icon": Icons.movie_rounded, "color": Colors.red},
-    {"title": "Quotes", "icon": Icons.format_quote_rounded, "color": Colors.purple},
-    {"title": "Pets", "icon": Icons.pets_rounded, "color": Colors.green},
-    {"title": "Travel", "icon": Icons.flight_takeoff_rounded, "color": Colors.teal},
-    {"title": "Mobile Apps", "icon": Icons.smartphone_rounded, "color": Colors.indigo},
-    {"title": "Music", "icon": Icons.music_note_rounded, "color": Colors.pink},
-    {"title": "Vehicles", "icon": Icons.directions_car_rounded, "color": Colors.amber},
-    {"title": "YouTube", "icon": Icons.play_circle_filled_rounded, "color": Colors.deepOrange},
+    {
+      "title": "Books", 
+      "icon": Icons.menu_book_rounded, 
+      "primaryColor": const Color(0xFF2196F3),
+      "secondaryColor": const Color(0xFF64B5F6),
+      "shadowColor": const Color(0xFF1976D2),
+    },
+    {
+      "title": "Recipes", 
+      "icon": Icons.restaurant_menu_rounded, 
+      "primaryColor": const Color(0xFFFF9800),
+      "secondaryColor": const Color(0xFFFFB74D),
+      "shadowColor": const Color(0xFFF57C00),
+    },
+    {
+      "title": "Movies", 
+      "icon": Icons.movie_rounded, 
+      "primaryColor": const Color(0xFFF44336),
+      "secondaryColor": const Color(0xFFE57373),
+      "shadowColor": const Color(0xFFD32F2F),
+    },
+    {
+      "title": "Quotes", 
+      "icon": Icons.format_quote_rounded, 
+      "primaryColor": const Color(0xFF9C27B0),
+      "secondaryColor": const Color(0xFFBA68C8),
+      "shadowColor": const Color(0xFF7B1FA2),
+    },
+    {
+      "title": "Pets", 
+      "icon": Icons.pets_rounded, 
+      "primaryColor": const Color(0xFF4CAF50),
+      "secondaryColor": const Color(0xFF81C784),
+      "shadowColor": const Color(0xFF388E3C),
+    },
+    {
+      "title": "Travel", 
+      "icon": Icons.flight_takeoff_rounded, 
+      "primaryColor": const Color(0xFF009688),
+      "secondaryColor": const Color(0xFF4DB6AC),
+      "shadowColor": const Color(0xFF00695C),
+    },
+    {
+      "title": "Mobile Apps", 
+      "icon": Icons.smartphone_rounded, 
+      "primaryColor": const Color(0xFF3F51B5),
+      "secondaryColor": const Color(0xFF7986CB),
+      "shadowColor": const Color(0xFF303F9F),
+    },
+    {
+      "title": "Music", 
+      "icon": Icons.music_note_rounded, 
+      "primaryColor": const Color(0xFFE91E63),
+      "secondaryColor": const Color(0xFFF06292),
+      "shadowColor": const Color(0xFFC2185B),
+    },
+    {
+      "title": "Vehicles", 
+      "icon": Icons.directions_car_rounded, 
+      "primaryColor": const Color(0xFFFFC107),
+      "secondaryColor": const Color(0xFFFFD54F),
+      "shadowColor": const Color(0xFFFFA000),
+    },
+    {
+      "title": "YouTube", 
+      "icon": Icons.play_circle_filled_rounded, 
+      "primaryColor": const Color(0xFFFF5722),
+      "secondaryColor": const Color(0xFFFF8A65),
+      "shadowColor": const Color(0xFFE64A19),
+    },
   ];
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 200),
       vsync: this,
-      lowerBound: 0.95,
-      upperBound: 1.05,
     );
+    
+    _staggerController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    );
+    
+    _staggerController.forward();
   }
 
-  void _onCardTap(String title) {
-    _controller.forward().then((_) {
-      _controller.reverse();
+  void _onCardTap(String title, int index) {
+    HapticFeedback.mediumImpact();
+    
+    setState(() {
+      _tappedIndex = index;
     });
 
-    // Check if widget is still mounted before proceeding
+    _controller.forward().then((_) {
+      _controller.reverse().then((_) {
+        if (mounted) {
+          setState(() {
+            _tappedIndex = null;
+          });
+        }
+      });
+    });
+
     if (!mounted) return;
 
-    // Determine which screen to navigate to based on the card title
-    Widget destinationScreen;
+    Future.delayed(const Duration(milliseconds: 180), () {
+      if (!mounted) return;
 
-    switch (title) {
-      case "Books":
-        destinationScreen = BookCollectionScreen(userName: widget.userName);
-        break;
-      case "Recipes":
-        destinationScreen = RecipeCollectionScreen(userName: widget.userName);
-        break;
-      case "Movies":
-        destinationScreen = MovieCollectionScreen(userName: widget.userName);
-        break;
-      case "Quotes":
-        destinationScreen = QuoteCollectionScreen(userName: widget.userName);
-        break;
-      case "Pets":
-        destinationScreen = PetCollectionScreen(userName: widget.userName);
-        break;
-      case "Travel":
-        destinationScreen = TravelCollectionScreen(userName: widget.userName);
-        break;
-      case "Mobile Apps":
-        destinationScreen = MobileAppsCollectionScreen(userName: widget.userName);
-        break;
-      case "Music":
-        destinationScreen = MusicCollectionScreen(userName: widget.userName);
-        break;
-      case "Vehicles":
-        destinationScreen = VehicleCollectionScreen(userName: widget.userName);
-        break;
-      case "YouTube":
-        destinationScreen = YouTubeChannelsCollectionScreen(userName: widget.userName);
-        break;
-      default:
-        // If the title doesn't match any known screens, show a snackbar
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('$title - Coming Soon!'),
-            duration: const Duration(seconds: 2),
-            backgroundColor: Colors.black87,
+      Widget destinationScreen;
+
+      switch (title) {
+        case "Books":
+          destinationScreen = BookCollectionScreen(userName: widget.userName);
+          break;
+        case "Recipes":
+          destinationScreen = RecipeCollectionScreen(userName: widget.userName);
+          break;
+        case "Movies":
+          destinationScreen = MovieCollectionScreen(userName: widget.userName);
+          break;
+        case "Quotes":
+          destinationScreen = QuoteCollectionScreen(userName: widget.userName);
+          break;
+        case "Pets":
+          destinationScreen = PetCollectionScreen(userName: widget.userName);
+          break;
+        case "Travel":
+          destinationScreen = TravelCollectionScreen(userName: widget.userName);
+          break;
+        case "Mobile Apps":
+          destinationScreen = MobileAppsCollectionScreen(userName: widget.userName);
+          break;
+        case "Music":
+          destinationScreen = MusicCollectionScreen(userName: widget.userName);
+          break;
+        case "Vehicles":
+          destinationScreen = VehicleCollectionScreen(userName: widget.userName);
+          break;
+        case "YouTube":
+          destinationScreen = YouTubeChannelsCollectionScreen(userName: widget.userName);
+          break;
+        default:
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('$title - Coming Soon! 🚀'),
+              duration: const Duration(seconds: 2),
+              backgroundColor: Colors.black87,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              margin: const EdgeInsets.all(20),
+            ),
+          );
+          return;
+      }
+
+      Navigator.push(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => destinationScreen,
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            const begin = Offset(1.0, 0.0);
+            const end = Offset.zero;
+            const curve = Curves.easeInOutCubic;
+
+            var tween = Tween(begin: begin, end: end).chain(
+              CurveTween(curve: curve),
+            );
+
+            var fadeAnimation = Tween(begin: 0.0, end: 1.0).animate(
+              CurvedAnimation(parent: animation, curve: Curves.easeInOut),
+            );
+
+            return FadeTransition(
+              opacity: fadeAnimation,
+              child: SlideTransition(
+                position: animation.drive(tween),
+                child: child,
+              ),
+            );
+          },
+          transitionDuration: const Duration(milliseconds: 400),
+        ),
+      );
+    });
+  }
+
+  Widget _build3DIcon(Map<String, dynamic> item, bool isPressed) {
+    return Container(
+      width: 60,
+      height: 60,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isPressed 
+              ? [
+                  item["secondaryColor"].withOpacity(0.8),
+                  item["primaryColor"],
+                ]
+              : [
+                  item["secondaryColor"],
+                  item["primaryColor"],
+                ],
+          stops: const [0.3, 1.0],
+        ),
+        boxShadow: [
+          // Main 3D shadow
+          BoxShadow(
+            color: item["shadowColor"].withOpacity(0.3),
+            offset: const Offset(0, 6),
+            blurRadius: 15,
+            spreadRadius: 0,
           ),
-        );
-        return; // Exit the function if no valid destination is found
-    }
-
-    // Navigate to the chosen destination screen
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => destinationScreen),
+          // Inner shadow for depth
+          BoxShadow(
+            color: item["primaryColor"].withOpacity(0.2),
+            offset: const Offset(0, 3),
+            blurRadius: 8,
+            spreadRadius: -2,
+          ),
+          // Top highlight
+          BoxShadow(
+            color: Colors.white.withOpacity(0.4),
+            offset: const Offset(-1, -1),
+            blurRadius: 3,
+            spreadRadius: -1,
+          ),
+        ],
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.white.withOpacity(0.2),
+              Colors.transparent,
+              item["shadowColor"].withOpacity(0.1),
+            ],
+            stops: const [0.0, 0.5, 1.0],
+          ),
+        ),
+        child: Icon(
+          item["icon"],
+          size: 24,
+          color: Colors.white,
+        ),
+      ),
     );
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  Widget _buildVaultCard(Map<String, dynamic> item, int index) {
+    final animationDelay = index * 0.08;
+    final slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.8),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _staggerController,
+      curve: Interval(animationDelay, animationDelay + 0.4, curve: Curves.easeOutBack),
+    ));
 
-  Widget _buildVaultCard(Map<String, dynamic> item) {
-    return ScaleTransition(
-      scale: Tween(begin: 1.0, end: 1.03).animate(
-        CurvedAnimation(parent: _controller, curve: Curves.elasticInOut),
-      ),
-      child: GestureDetector(
-        onTap: () => _onCardTap(item["title"]),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: [
-              BoxShadow(
-                color: (item["color"] as Color).withOpacity(0.15),
-                blurRadius: 6,
-                offset: const Offset(0, 3),
+    final fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _staggerController,
+      curve: Interval(animationDelay, animationDelay + 0.4, curve: Curves.easeOut),
+    ));
+
+    final scaleAnimation = _tappedIndex == index
+        ? Tween<double>(begin: 1.0, end: 0.92).animate(
+            CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+          )
+        : Tween<double>(begin: 1.0, end: 1.0).animate(_controller);
+
+    return SlideTransition(
+      position: slideAnimation,
+      child: FadeTransition(
+        opacity: fadeAnimation,
+        child: ScaleTransition(
+          scale: scaleAnimation,
+          child: GestureDetector(
+            onTap: () => _onCardTap(item["title"], index),
+            onTapDown: (_) => HapticFeedback.selectionClick(),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  // Primary card shadow
+                  BoxShadow(
+                    color: item["primaryColor"].withOpacity(0.12),
+                    offset: const Offset(0, 8),
+                    blurRadius: 20,
+                    spreadRadius: -2,
+                  ),
+                  // Subtle depth shadow
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.06),
+                    offset: const Offset(0, 4),
+                    blurRadius: 12,
+                    spreadRadius: -4,
+                  ),
+                ],
               ),
-            ],
-          ),
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 10),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircleAvatar(
-                radius: 22,
-                backgroundColor: (item["color"] as Color).withOpacity(0.12),
-                child: Icon(item["icon"], color: item["color"], size: 22),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                item["title"],
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: item["color"],
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // 3D Icon
+                    _build3DIcon(item, _tappedIndex == index),
+                    
+                    const SizedBox(height: 16),
+                    
+                    // Title with better typography
+                    Text(
+                      item["title"],
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: item["primaryColor"],
+                        letterSpacing: 0.3,
+                        height: 1.2,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    
+                    // Subtle accent line
+                    Container(
+                      margin: const EdgeInsets.only(top: 6),
+                      height: 2,
+                      width: 20,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            item["primaryColor"].withOpacity(0.3),
+                            item["primaryColor"],
+                            item["primaryColor"].withOpacity(0.3),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(1),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -159,53 +388,79 @@ class _VaultScreenState extends State<VaultScreen>
   }
 
   @override
+  void dispose() {
+    _controller.dispose();
+    _staggerController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: const Color(0xFFF8F9FA),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header
-              Center(
+              // Enhanced header
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 20),
                 child: Column(
                   children: [
-                    const SizedBox(height: 8),
                     Text(
-                      "${widget.userName}'s Vault 🎒📦",
+                      "${widget.userName}'s Vault 🎒",
                       style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.deepPurple,
+                        fontSize: 26,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF5B2C87),
+                        letterSpacing: 0.5,
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 8),
                     Text(
                       "Your collections in one place",
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: 16,
                         color: Colors.grey[600],
+                        letterSpacing: 0.2,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      height: 4,
+                      width: 60,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [
+                            Color(0xFF667EEA),
+                            Color(0xFF764BA2),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(2),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
 
-              // Grid Layout
+              // Grid with better spacing
               Expanded(
                 child: GridView.builder(
+                  physics: const BouncingScrollPhysics(
+                    parent: AlwaysScrollableScrollPhysics(),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
                   itemCount: vaultItems.length,
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2, // 2 per row
-                    mainAxisSpacing: 18,
-                    crossAxisSpacing: 18,
-                    childAspectRatio: 1.05, // smaller white boxes
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 20,
+                    crossAxisSpacing: 20,
+                    childAspectRatio: 0.85,
                   ),
                   itemBuilder: (context, index) {
-                    return _buildVaultCard(vaultItems[index]);
+                    return _buildVaultCard(vaultItems[index], index);
                   },
                 ),
               ),
