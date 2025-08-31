@@ -37,42 +37,99 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     if (result['success']) {
-      final userData = result['data']['data'];
-      final user = User(
-        id: userData['id'],
-        name: userData['name'],
-        email: userData['email'],
-      );
-      await StorageService.saveUser(user);
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              Icon(Icons.check_circle, color: Colors.white),
-              SizedBox(width: 10),
-              Text('Registration successful! 🎉'),
-            ],
+      try {
+        // Handle both response formats
+        final responseData = result['data'];
+        Map<String, dynamic> userData;
+        
+        // Check if it's the registration server response format
+        if (responseData.containsKey('data') && responseData['data'] is Map) {
+          userData = responseData['data']; // Registration API format
+        } else if (responseData.containsKey('user')) {
+          userData = responseData['user']; // Login API format
+        } else {
+          userData = responseData; // Direct user data
+        }
+        
+        final user = User(
+          id: userData['id'].toString(),
+          name: userData['name'].toString(),
+          email: userData['email'].toString(),
+        );
+        await StorageService.saveUser(user);
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 10),
+                Text('Registration successful! 🎉'),
+              ],
+            ),
+            backgroundColor: Colors.green,
+            duration: Duration(seconds: 3),
           ),
-          backgroundColor: Colors.green,
-        ),
-      );
+        );
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LoginScreen()),
-      );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoginScreen()),
+        );
+      } catch (e) {
+        print('Error parsing user data: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.error, color: Colors.white),
+                SizedBox(width: 10),
+                Flexible(child: Text('Registration successful but failed to save user data')),
+              ],
+            ),
+            backgroundColor: Colors.orange,
+            duration: Duration(seconds: 3),
+          ),
+        );
+        
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoginScreen()),
+        );
+      }
     } else {
+      // Handle different types of errors
+      String errorMessage = 'Registration failed. Please try again.';
+      
+      if (result.containsKey('networkError') && result['networkError'] == true) {
+        errorMessage = result['error'] ?? 'Network connection failed. Please check your internet and try again.';
+      } else if (result['data'] != null) {
+        if (result['data'] is Map && result['data']['message'] != null) {
+          errorMessage = result['data']['message'];
+        } else if (result['data'] is String) {
+          errorMessage = result['data'];
+        }
+      } else if (result['error'] != null) {
+        errorMessage = result['error'];
+      }
+      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
             children: [
               Icon(Icons.error, color: Colors.white),
               SizedBox(width: 10),
-              Text('Registration failed. Please try again. ❌'),
+              Flexible(
+                child: Text(
+                  errorMessage,
+                  style: TextStyle(fontSize: 14),
+                ),
+              ),
             ],
           ),
           backgroundColor: Colors.red,
+          duration: Duration(seconds: 5),
+          behavior: SnackBarBehavior.floating,
         ),
       );
     }
@@ -133,6 +190,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your name';
                     }
+                    if (value.length < 2) {
+                      return 'Name must be at least 2 characters';
+                    }
                     return null;
                   },
                 ),
@@ -154,8 +214,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your email';
                     }
-                    if (!value.contains('@')) {
-                      return 'Please enter a valid email';
+                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                      return 'Please enter a valid email address';
                     }
                     return null;
                   },
@@ -206,9 +266,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
+                      elevation: 2,
                     ),
                     child: _isLoading
-                        ? CircularProgressIndicator(color: Colors.white)
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                              SizedBox(width: 10),
+                              Text(
+                                'Creating Account...',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          )
                         : Text(
                             'Create Account 🚀',
                             style: TextStyle(
