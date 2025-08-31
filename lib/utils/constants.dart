@@ -1,5 +1,5 @@
 class AppConstants {
-  static const String logoUrl = 'https://res.cloudinary.com/dpf5bkafv/image/upload/v1756207961/Logo_aktvuj.png';
+  static const String logoUrl = 'https://res.cloudinary.com/dpf5bkafv/image/upload/v1756621914/Collecthub_FluuterLogo_abxfpw.png';
   static const String baseUrl = 'https://collecthubdotnet.onrender.com/api';
   static const String loginUrl = 'https://collecthub-c1la.onrender.com/api/users/login';
   static const String personalityUrl = 'https://collecthub-c1la.onrender.com/api/aipersonality/analysis';
