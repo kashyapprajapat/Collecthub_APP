@@ -1,35 +1,873 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import '../services/storage_service.dart';
 
-class VehicleCollectionScreen extends StatelessWidget {
+class Vehicle {
+  final String id;
+  final String vehicleName;
+  final String typeOfVehicle;
+  final int launchYear;
+  final String reason;
+  final String userId;
+
+  Vehicle({
+    required this.id,
+    required this.vehicleName,
+    required this.typeOfVehicle,
+    required this.launchYear,
+    required this.reason,
+    required this.userId,
+  });
+
+  factory Vehicle.fromJson(Map<String, dynamic> json) {
+    return Vehicle(
+      id: json['id']?.toString() ?? '',
+      vehicleName: json['vehicleName']?.toString() ?? '',
+      typeOfVehicle: json['typeOfVehicle']?.toString() ?? '',
+      launchYear: json['launchYear'] ?? 0,
+      reason: json['reason']?.toString() ?? '',
+      userId: json['userId']?.toString() ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'userId': userId,
+      'vehicleName': vehicleName,
+      'typeOfVehicle': typeOfVehicle,
+      'launchYear': launchYear,
+      'reason': reason,
+    };
+  }
+}
+
+class VehicleCollectionScreen extends StatefulWidget {
   final String userName;
-  
+
   const VehicleCollectionScreen({super.key, required this.userName});
+
+  @override
+  State<VehicleCollectionScreen> createState() => _VehicleCollectionScreenState();
+}
+
+class _VehicleCollectionScreenState extends State<VehicleCollectionScreen>
+    with TickerProviderStateMixin {
+  List<Vehicle> vehicles = [];
+  bool isLoading = false;
+  String? userId;
+  late AnimationController _dragController;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _dragController = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(parent: _dragController, curve: Curves.easeInOut),
+    );
+    _loadUserId();
+  }
+
+  @override
+  void dispose() {
+    _dragController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadUserId() async {
+    userId = await StorageService.getUserId();
+    if (userId != null && userId!.isNotEmpty) {
+      _fetchVehicles();
+    } else {
+      _showMessage('User ID not found. Please login again.');
+    }
+  }
+
+  Future<void> _fetchVehicles() async {
+    if (userId == null || userId!.isEmpty) return;
+
+    setState(() => isLoading = true);
+
+    try {
+      final response = await http.get(
+        Uri.parse('https://collecthubdotnet.onrender.com/api/FavVehicle?userId=$userId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'text/plain',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final responseBody = response.body.trim();
+
+        if (responseBody.isEmpty || responseBody == 'null') {
+          setState(() {
+            vehicles = [];
+          });
+          return;
+        }
+
+        final dynamic jsonData = json.decode(responseBody);
+
+        if (jsonData == null) {
+          setState(() {
+            vehicles = [];
+          });
+          return;
+        }
+
+        if (jsonData['success'] == true && jsonData['data'] != null) {
+          final List<dynamic> vehicleList = jsonData['data'];
+          setState(() {
+            vehicles = vehicleList
+                .map((json) => Vehicle.fromJson(json as Map<String, dynamic>))
+                .toList();
+          });
+        } else {
+          setState(() {
+            vehicles = [];
+          });
+        }
+      } else if (response.statusCode == 404) {
+        setState(() {
+          vehicles = [];
+        });
+      } else {
+        _showMessage('Error fetching vehicles: ${response.statusCode}');
+      }
+    } catch (e) {
+      setState(() {
+        vehicles = [];
+      });
+      _showMessage('Error fetching vehicles: Please check your internet connection');
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
+
+  Future<void> _addVehicle(String name, String type, int year, String reason) async {
+    if (userId == null || userId!.isEmpty) {
+      _showMessage('User ID not found. Please login again.');
+      return;
+    }
+
+    setState(() => isLoading = true);
+
+    try {
+      final requestBody = {
+        'userId': userId,
+        'vehicleName': name,
+        'typeOfVehicle': type,
+        'launchYear': year,
+        'reason': reason,
+      };
+
+      final response = await http.post(
+        Uri.parse('https://collecthubdotnet.onrender.com/api/FavVehicle'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'text/plain',
+        },
+        body: json.encode(requestBody),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseData = json.decode(response.body);
+        if (responseData['success'] == true) {
+          _showMessage('Vehicle added successfully! 🚗', isSuccess: true);
+          await Future.delayed(const Duration(milliseconds: 500));
+          _fetchVehicles();
+        } else {
+          _showMessage('Error adding vehicle: ${responseData['message'] ?? 'Unknown error'}');
+        }
+      } else {
+        _showMessage('Error adding vehicle: ${response.statusCode}');
+      }
+    } catch (e) {
+      _showMessage('Error adding vehicle: Please check your internet connection');
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
+
+  Future<void> _updateVehicle(
+      Vehicle vehicle, String name, String type, int year, String reason) async {
+    setState(() => isLoading = true);
+
+    try {
+      final requestBody = {
+        'id': vehicle.id,
+        'userId': userId,
+        'vehicleName': name,
+        'typeOfVehicle': type,
+        'launchYear': year,
+        'reason': reason,
+      };
+
+      final response = await http.put(
+        Uri.parse('https://collecthubdotnet.onrender.com/api/FavVehicle?id=${vehicle.id}&userId=$userId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'text/plain',
+        },
+        body: json.encode(requestBody),
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        if (responseData['success'] == true) {
+          _showMessage('Vehicle updated successfully! ✨', isSuccess: true);
+          await Future.delayed(const Duration(milliseconds: 500));
+          _fetchVehicles();
+        } else {
+          _showMessage('Error updating vehicle: ${responseData['message'] ?? 'Unknown error'}');
+        }
+      } else {
+        _showMessage('Error updating vehicle: ${response.statusCode}');
+      }
+    } catch (e) {
+      _showMessage('Error updating vehicle: Please check your internet connection');
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
+
+  Future<void> _deleteVehicle(Vehicle vehicle) async {
+    setState(() => isLoading = true);
+
+    try {
+      final response = await http.delete(
+        Uri.parse('https://collecthubdotnet.onrender.com/api/FavVehicle?id=${vehicle.id}'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'text/plain',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        if (responseData['success'] == true) {
+          _showMessage('Vehicle removed from garage! 🗑️', isSuccess: true);
+          await Future.delayed(const Duration(milliseconds: 500));
+          _fetchVehicles();
+        } else {
+          _showMessage('Error deleting vehicle: ${responseData['message'] ?? 'Unknown error'}');
+        }
+      } else {
+        _showMessage('Error deleting vehicle: ${response.statusCode}');
+      }
+    } catch (e) {
+      _showMessage('Error deleting vehicle: Please check your internet connection');
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
+
+  void _showMessage(String message, {bool isSuccess = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isSuccess ? Colors.green : Colors.red,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  void _showAddVehicleDialog() {
+    final nameController = TextEditingController();
+    final typeController = TextEditingController();
+    final reasonController = TextEditingController();
+    int? selectedYear;
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: SingleChildScrollView(
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Colors.amber.shade50, Colors.white],
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.shade100,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.directions_car, color: Colors.amber, size: 24),
+                    ),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'Add New Vehicle',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                _buildTextField(nameController, 'Vehicle Name', Icons.directions_car),
+                const SizedBox(height: 16),
+                _buildTextField(typeController, 'Vehicle Type', Icons.category),
+                const SizedBox(height: 16),
+                _buildYearDropdown((year) => selectedYear = year),
+                const SizedBox(height: 16),
+                _buildTextField(reasonController, 'Reason', Icons.lightbulb,
+                    maxLines: 3),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Cancel', style: TextStyle(fontSize: 16)),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (nameController.text.trim().isNotEmpty &&
+                              typeController.text.trim().isNotEmpty &&
+                              selectedYear != null &&
+                              reasonController.text.trim().isNotEmpty) {
+                            Navigator.pop(context);
+                            _addVehicle(
+                              nameController.text.trim(),
+                              typeController.text.trim(),
+                              selectedYear!,
+                              reasonController.text.trim(),
+                            );
+                          } else {
+                            _showMessage('Please fill all fields');
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.amber,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Add Vehicle', style: TextStyle(fontSize: 16)),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showUpdateVehicleDialog(Vehicle vehicle) {
+    final nameController = TextEditingController(text: vehicle.vehicleName);
+    final typeController = TextEditingController(text: vehicle.typeOfVehicle);
+    final reasonController = TextEditingController(text: vehicle.reason);
+    int? selectedYear = vehicle.launchYear;
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: SingleChildScrollView(
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Colors.orange.shade50, Colors.white],
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade100,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.edit, color: Colors.orange, size: 24),
+                    ),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'Update Vehicle',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                _buildTextField(nameController, 'Vehicle Name', Icons.directions_car),
+                const SizedBox(height: 16),
+                _buildTextField(typeController, 'Vehicle Type', Icons.category),
+                const SizedBox(height: 16),
+                _buildYearDropdown((year) => selectedYear = year, initialYear: vehicle.launchYear),
+                const SizedBox(height: 16),
+                _buildTextField(reasonController, 'Reason', Icons.lightbulb,
+                    maxLines: 3),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Cancel', style: TextStyle(fontSize: 16)),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (nameController.text.trim().isNotEmpty &&
+                              typeController.text.trim().isNotEmpty &&
+                              selectedYear != null &&
+                              reasonController.text.trim().isNotEmpty) {
+                            Navigator.pop(context);
+                            _updateVehicle(
+                              vehicle,
+                              nameController.text.trim(),
+                              typeController.text.trim(),
+                              selectedYear!,
+                              reasonController.text.trim(),
+                            );
+                          } else {
+                            _showMessage('Please fill all fields');
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Update', style: TextStyle(fontSize: 16)),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showDeleteConfirmation(Vehicle vehicle) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.red.shade100,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.warning, color: Colors.red, size: 20),
+            ),
+            const SizedBox(width: 12),
+            const Text('Remove Vehicle'),
+          ],
+        ),
+        content: Text(
+          'Are you sure you want to remove "${vehicle.vehicleName.isNotEmpty ? vehicle.vehicleName : 'this vehicle'}" from your garage?',
+          style: const TextStyle(fontSize: 16),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('No'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _deleteVehicle(vehicle);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Yes, Remove'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTextField(
+      TextEditingController controller, String label, IconData icon,
+      {int maxLines = 1, bool isNumber = false}) {
+    return TextFormField(
+      controller: controller,
+      maxLines: maxLines,
+      keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, color: Colors.amber),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.amber, width: 2),
+        ),
+        filled: true,
+        fillColor: Colors.grey.shade50,
+      ),
+    );
+  }
+
+  Widget _buildYearDropdown(Function(int?) onChanged, {int? initialYear}) {
+    final currentYear = DateTime.now().year;
+    final years = List.generate(100, (index) => currentYear - index);
+    
+    return StatefulBuilder(
+      builder: (context, setState) {
+        int? selectedYear = initialYear;
+        
+        return DropdownButtonFormField<int>(
+          value: selectedYear,
+          decoration: InputDecoration(
+            labelText: 'Launch Year',
+            prefixIcon: const Icon(Icons.calendar_today, color: Colors.amber),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.amber, width: 2),
+            ),
+            filled: true,
+            fillColor: Colors.grey.shade50,
+          ),
+          items: years.map((year) {
+            return DropdownMenuItem<int>(
+              value: year,
+              child: Text(year.toString()),
+            );
+          }).toList(),
+          onChanged: (value) {
+            setState(() {
+              selectedYear = value;
+            });
+            onChanged(value);
+          },
+          validator: (value) {
+            if (value == null) {
+              return 'Please select a year';
+            }
+            return null;
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildVehicleCard(Vehicle vehicle) {
+    return Dismissible(
+      key: Key(vehicle.id),
+      direction: DismissDirection.horizontal,
+      onDismissed: (direction) {
+        // This won't be called if confirmDismiss returns false
+      },
+      confirmDismiss: (direction) async {
+        if (direction == DismissDirection.startToEnd) {
+          // Swiping from left to right (e.g., to delete)
+          _showDeleteConfirmation(vehicle);
+        } else if (direction == DismissDirection.endToStart) {
+          // Swiping from right to left (e.g., to update)
+          _showUpdateVehicleDialog(vehicle);
+        }
+        return false; // Prevent actual dismissal here, we handle actions in dialogs
+      },
+      background: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.red.shade400, // Background for delete
+          borderRadius: BorderRadius.circular(16),
+        ),
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.only(left: 20),
+        child: const Row(
+          children: [
+            Icon(Icons.delete, color: Colors.white, size: 28),
+            SizedBox(width: 8),
+            Text('Delete',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18)),
+          ],
+        ),
+      ),
+      secondaryBackground: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.orange.shade400, // Background for update
+          borderRadius: BorderRadius.circular(16),
+        ),
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Text('Update',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18)),
+            SizedBox(width: 8),
+            Icon(Icons.edit, color: Colors.white, size: 28),
+          ],
+        ),
+      ),
+      child: AnimatedBuilder(
+        animation: _scaleAnimation,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: _scaleAnimation.value,
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Colors.white, Colors.amber.shade50],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.amber.shade100.withOpacity(0.5),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: Colors.amber.shade600,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.directions_car, color: Colors.white, size: 24),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            vehicle.vehicleName.isNotEmpty
+                                ? vehicle.vehicleName
+                                : 'Untitled Vehicle',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Text(
+                                vehicle.typeOfVehicle.isNotEmpty
+                                    ? vehicle.typeOfVehicle.toUpperCase()
+                                    : 'UNKNOWN TYPE',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.amber.shade700,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '• ${vehicle.launchYear}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey.shade600,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            vehicle.reason.isNotEmpty
+                                ? vehicle.reason
+                                : 'No reason provided',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey.shade700,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("$userName's Vehicle Collection 🚗"),
+        title: Text("${widget.userName}'s Vehicles 🚗"),
         backgroundColor: Colors.amber,
         foregroundColor: Colors.white,
+        elevation: 0,
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              "Welcome to your Vehicle collection, $userName!",
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
+      body: Column(
+        children: [
+          // Header Section
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.amber, Colors.amber.shade700],
+              ),
             ),
-            const SizedBox(height: 20),
-            const Text(
-              "This is where the rides you love or dream to own will be displayed.",
-              style: TextStyle(fontSize: 16),
-              textAlign: TextAlign.center,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Vehicle Garage 🚗',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                FloatingActionButton(
+                  onPressed: _showAddVehicleDialog,
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.amber,
+                  mini: true,
+                  child: const Icon(Icons.add),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          // Vehicles List
+          Expanded(
+            child: isLoading
+                ? const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(),
+                        SizedBox(height: 16),
+                        Text('Loading your vehicles...'),
+                      ],
+                    ),
+                  )
+                : vehicles.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(32),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade100,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.directions_car,
+                                size: 64,
+                                color: Colors.grey.shade400,
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            Text(
+                              'Your garage is empty',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Tap the + button to add your first vehicle',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey.shade500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : RefreshIndicator(
+                        onRefresh: _fetchVehicles,
+                        child: ListView.builder(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          itemCount: vehicles.length,
+                          itemBuilder: (context, index) {
+                            return _buildVehicleCard(vehicles[index]);
+                          },
+                        ),
+                      ),
+          ),
+        ],
       ),
     );
   }
