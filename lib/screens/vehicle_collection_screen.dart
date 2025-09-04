@@ -567,7 +567,7 @@ class _VehicleCollectionScreenState extends State<VehicleCollectionScreen>
         int? selectedYear = initialYear;
         
         return DropdownButtonFormField<int>(
-          value: selectedYear,
+          initialValue: selectedYear,
           decoration: InputDecoration(
             labelText: 'Launch Year',
             prefixIcon: const Icon(Icons.calendar_today, color: Colors.amber),
