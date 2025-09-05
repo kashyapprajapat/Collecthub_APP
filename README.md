@@ -8,6 +8,16 @@
 
 ---
 
+## 📱 App Screenshots
+
+<div align="center">
+  <img src="./DemoImages/Introscreen.png" alt="Intro Screen" width="250"/>
+  <img src="./DemoImages/LoginScreen.png" alt="Login Screen" width="250"/>
+  <img src="./DemoImages/RegisterScreen.png" alt="Register Screen" width="250"/>
+</div>
+
+---
+
 ## 🚀 Tech Stack
 
 CollectHub is built with a modern and robust tech stack:
