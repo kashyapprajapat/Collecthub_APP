@@ -12,8 +12,8 @@
 
 <div align="center">
   <img src="./DemoImages/Introscreen.png" alt="Intro Screen" width="250"/>
-  <img src="./DemoImages/LoginScreen.png" alt="Login Screen" width="250"/>
-  <img src="./DemoImages/RegisterScreen.png" alt="Register Screen" width="250"/>
+  <img src="./DemoImages/Loginscreen.png" alt="Login Screen" width="250"/>
+  <img src="./DemoImages/registrationscreen.png" alt="Register Screen" width="250"/>
 </div>
 
 ---
