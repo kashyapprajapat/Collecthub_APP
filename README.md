@@ -10,10 +10,35 @@
 
 ## 📱 App Screenshots
 
+### 🔐 Authentication Flow
 <div align="center">
-  <img src="./DemoImages/Introscreen.png" alt="Intro Screen" width="250"/>
+  <img src="./DemoImages/Introscreen.png" alt="Welcome/Intro Screen" width="250"/>
   <img src="./DemoImages/Loginscreen.png" alt="Login Screen" width="250"/>
-  <img src="./DemoImages/registrationscreen.png" alt="Register Screen" width="250"/>
+  <img src="./DemoImages/registrationscreen.png" alt="Registration Screen" width="250"/>
+</div>
+
+### ✅ Login Success & Navigation
+<div align="center">
+  <img src="./DemoImages/LoginSucessScreen.png" alt="Login Success Screen" width="250"/>
+  <img src="./DemoImages/LogoutScreen.png" alt="Logout Screen" width="250"/>
+</div>
+
+### 🏠 Main Application Screens
+<div align="center">
+  <img src="./DemoImages/MainScreen1.png" alt="Main Screen - Dashboard" width="250"/>
+  <img src="./DemoImages/MainScreen2.png" alt="Main Screen - Features" width="250"/>
+  <img src="./DemoImages/MainScreen3.png" alt="Main Screen - Collections" width="250"/>
+</div>
+
+<div align="center">
+  <img src="./DemoImages/MainScreen4.png" alt="Main Screen - Profile" width="250"/>
+</div>
+
+### 🔒 Vault/Collections Management
+<div align="center">
+  <img src="./DemoImages/VaultScreen1.png" alt="Vault Screen - Overview" width="250"/>
+  <img src="./DemoImages/VaultScreen2.png" alt="Vault Screen - Details" width="250"/>
+  <img src="./DemoImages/VaultScreen3.png" alt="Vault Screen - Management" width="250"/>
 </div>
 
 ---
