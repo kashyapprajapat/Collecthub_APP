@@ -28,11 +28,9 @@
   <img src="./DemoImages/MainScreen1.png" alt="Main Screen - Dashboard" width="250"/>
   <img src="./DemoImages/MainScreen2.png" alt="Main Screen - Features" width="250"/>
   <img src="./DemoImages/MainScreen3.png" alt="Main Screen - Collections" width="250"/>
-</div>
-
-<div align="center">
   <img src="./DemoImages/MainScreen4.png" alt="Main Screen - Profile" width="250"/>
 </div>
+
 
 ### 🔒 Vault/Collections Management
 <div align="center">
