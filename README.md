@@ -31,12 +31,19 @@
   <img src="./DemoImages/MainScreen4.png" alt="Main Screen - Profile" width="250"/>
 </div>
 
-
 ### 🔒 Vault/Collections Management
 <div align="center">
   <img src="./DemoImages/VaultScreen1.png" alt="Vault Screen - Overview" width="250"/>
   <img src="./DemoImages/VaultScreen2.png" alt="Vault Screen - Details" width="250"/>
   <img src="./DemoImages/VaultScreen3.png" alt="Vault Screen - Management" width="250"/>
+</div>
+
+### 📝 Collection Item Management
+<div align="center">
+  <img src="./DemoImages/AddScreen.png" alt="Add Item Screen" width="250"/>
+  <img src="./DemoImages/ViewScreen.png" alt="View Item Screen" width="250"/>
+  <img src="./DemoImages/updateScreen.png" alt="Update Item Screen" width="250"/>
+  <img src="./DemoImages/DeleteScreen.png" alt="Delete Item Screen" width="250"/>
 </div>
 
 ---
