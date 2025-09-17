@@ -4,10 +4,17 @@
 
 ![Status](https://img.shields.io/badge/Status-Production-brightgreen?style=for-the-badge) ![Live](https://img.shields.io/badge/Live-Yes-success?style=for-the-badge) ![Platform](https://img.shields.io/badge/Platform-Mobile-blue?style=for-the-badge)
 
-
-
-
 <img src="https://res.cloudinary.com/dpf5bkafv/image/upload/v1756207961/Logo_aktvuj.png" alt="CollectHub Logo" width="200"/>
+
+---
+
+## 📲 Download CollectHub
+
+Get CollectHub on your device today!
+
+[![Download on Amazon Appstore](https://images-na.ssl-images-amazon.com/images/G/01/mobile-apps/devportal2/res/images/amazon-appstore-badge-english-black.png)](https://www.amazon.in/dp/B0FR336WFB/ref=sr_1_1?crid=1D0SVTEMRGP9C&dib=eyJ2IjoiMSJ9.q4cm3eTFnwL8uWnjnuqlmw.DDDnR4rdzvuZXROFCbLBm_ghSHXoxK1vzWocuPfTG1o&dib_tag=se&keywords=collecthub&qid=1758115392&s=mobile-apps&sprefix=collecthub%2Cmobile-apps%2C249&sr=1-1)
+
+**Direct Link**: [CollectHub on Amazon Appstore](https://www.amazon.in/dp/B0FR336WFB/ref=sr_1_1?crid=1D0SVTEMRGP9C&dib=eyJ2IjoiMSJ9.q4cm3eTFnwL8uWnjnuqlmw.DDDnR4rdzvuZXROFCbLBm_ghSHXoxK1vzWocuPfTG1o&dib_tag=se&keywords=collecthub&qid=1758115392&s=mobile-apps&sprefix=collecthub%2Cmobile-apps%2C249&sr=1-1)
 
 ---
 
