@@ -35,10 +35,10 @@ Get CollectHub on your device today!
 
 ### 🏠 Main Application Screens
 <div align="center">
-  <img src="./DemoImages/MainScreen1.png" alt="Main Screen - Dashboard" width="250"/>
-  <img src="./DemoImages/MainScreen2.png" alt="Main Screen - Features" width="250"/>
-  <img src="./DemoImages/MainScreen3.png" alt="Main Screen - Collections" width="250"/>
-  <img src="./DemoImages/MainScreen4.png" alt="Main Screen - Profile" width="250"/>
+  <img src="./DemoImages/MainScreen1.png" alt="Main Screen - Dashboard" width="200"/>
+  <img src="./DemoImages/MainScreen2.png" alt="Main Screen - Features" width="200"/>
+  <img src="./DemoImages/MainScreen3.png" alt="Main Screen - Collections" width="200"/>
+  <img src="./DemoImages/MainScreen4.png" alt="Main Screen - Profile" width="200"/>
 </div>
 
 ### 🔒 Vault/Collections Management
