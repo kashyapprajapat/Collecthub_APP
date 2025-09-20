@@ -50,10 +50,10 @@ Get CollectHub on your device today!
 
 ### 📝 Collection Item Management
 <div align="center">
-  <img src="./DemoImages/AddScreen.png" alt="Add Item Screen" width="250"/>
-  <img src="./DemoImages/ViewScreen.png" alt="View Item Screen" width="250"/>
-  <img src="./DemoImages/updateScreen.png" alt="Update Item Screen" width="250"/>
-  <img src="./DemoImages/DeleteScreen.png" alt="Delete Item Screen" width="250"/>
+  <img src="./DemoImages/AddScreen.png" alt="Add Item Screen" width="200"/>
+  <img src="./DemoImages/ViewScreen.png" alt="View Item Screen" width="200"/>
+  <img src="./DemoImages/updateScreen.png" alt="Update Item Screen" width="200"/>
+  <img src="./DemoImages/DeleteScreen.png" alt="Delete Item Screen" width="200"/>
 </div>
 
 ---
