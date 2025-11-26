@@ -58,6 +58,15 @@ Get CollectHub on your device today!
 
 ---
 
+## 🏗️ Backend Infrastructure
+
+<div align="center">
+  <img src="./DemoImages/CollectHubBackendInfrastructre.png" alt="Backend Infrastructure Diagram" width="500"/>
+</div>
+
+
+---
+
 ## 🚀 Tech Stack
 
 CollectHub is built with a modern and robust tech stack:
